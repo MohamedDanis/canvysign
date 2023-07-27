@@ -44,6 +44,7 @@ function Page() {
     const [nameFromChild, setNameFromChild] = useState('');
     const [dateFromChild, setDateFromChild] = useState('');
     const [signName, setSignName] = useState('');
+    //recieves data from child
     const handleDataFromChild = async (data: any, name: string, date: any,signname:any) => {
         console.log(data,'data');
         console.log(name,'nameeeeee');
@@ -63,42 +64,47 @@ function Page() {
             setOpen(false)
         }, 2000);
     }
-    //s3 delete
+
+    /**
+     * Deletes an object from the S3 bucket "canvisign" and reloads the page.
+     * param a - The key of the object to be deleted.
+     */
     const handleDelete = async (a: any) => {
-        console.log(a);
-        const objectParams = {
-            Bucket: "canvisign",
-            Key: a,
-        };
-        try {
-            await s3.deleteObject(objectParams).promise()
-            console.log(`File "${a}" deleted successfully.`);
-            await window.location.reload();
-        } catch (error) {
-            console.error(`Error deleting file "${a}":`, error);
-        }
+      console.log(a);
+      const objectParams = {
+        Bucket: "canvisign",
+        Key: a,
+      };
+      try {
+        await s3.deleteObject(objectParams).promise()
+        console.log(`File "${a}" deleted successfully.`);
+        await window.location.reload();
+      } catch (error) {
+        console.error(`Error deleting file "${a}":`, error);
+      }
 
     }
+
    
    
-    
-    // console.log(dateFromChild);
     useEffect(() => {
 
+        /**
+         * Retrieves a list of images from the S3 bucket "canvisign" and sets the state of the component with the list of images.
+         */
         const getImages = async () => {
-            try {
-                const params = {
-                    Bucket: "canvisign",
-                }
-                await s3.listObjectsV2(params).promise().then((data) => {
-                    if (data && data.Contents) {
-                        setData(data.Contents);
-
-                    }
-                });
-            } catch (err) {
-                console.log(err);
+          try {
+            const params = {
+              Bucket: "canvisign",
             }
+            await s3.listObjectsV2(params).promise().then((data) => {
+              if (data && data.Contents) {
+                setData(data.Contents);
+              }
+            });
+          } catch (err) {
+            console.log(err);
+          }
         }
         const storedData = localStorage.getItem('alldata');
         if (storedData) {
@@ -106,7 +112,7 @@ function Page() {
         }
         getImages()
         if (dataFromChild !== null) {
-            // window.location.reload();
+            window.location.reload();
         }
     }, [dataFromChild])
     

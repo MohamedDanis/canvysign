@@ -60,6 +60,7 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
   };
 
   const nameHelper=()=>{
+      //Used to generate random name for the signature
     const min = 1;
     const max = 100;
     const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -69,6 +70,9 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
     
   }
   const handleImage = async () => {
+
+    //Used to convert the canvas to image
+
     if (!stageRef.current) return; // add null check
     const uri = stageRef.current.toDataURL();
     const byteString = atob(uri.split(',')[1]);
@@ -80,13 +84,13 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
     const blob = new Blob([ab], { type: 'image/png' });
     const file = new File([blob], 'image.png', { type: 'image/png' });
     console.log(file);
-    // to s3 upload
    
+   
+   
+    // Used to upload the image to s3 bucket
    
     try {
-      // await setSignName(`signd${Math.floor(Math.random() * 100) + 1}`)
       await setAllData(`signd`)
-      console.log(alldata,1234567);
       
       await s3.upload({
         Bucket: 'canvisign',
@@ -131,7 +135,7 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
 
       <button onClick={handleSave}
         className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500  mt-4"
-      >Save Drawing</button>
+      >Save Signature</button>
       
     </div>
   );
