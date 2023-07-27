@@ -3,13 +3,44 @@ import { Stage, Layer, Line } from 'react-konva';
 import Konva from 'konva'
 import s3 from '@/utils/s3'
 import DatePicker from "react-datepicker";
+import { v4 as uuidv4 } from 'uuid';
 
-const DrawingCanvas = React.forwardRef((props, ref) => {
+const DrawingCanvas = ({sendDataToParent}:any) => {
   const [lines, setLines] = useState<any>([]);
   const [isDrawing, setIsDrawing] = useState<any>(false);
   const stageRef = useRef<Konva.Stage>(null);
   const [startDate, setStartDate] = useState<any>(new Date());
+  const [name,setName]=useState<string>('')
+  const[signname,setSignName]=useState<any>('')
+  const [datatoparent,Setdatatoparent]=useState(true)
+  const [alldata,setAllData]=useState<any>()
 
+
+  const handleSave = async() => {
+    const id = uuidv4();
+    
+
+    await handleImage();
+
+    // const obj = {
+    //   name: name,
+    //   date: startDate,
+    //   image: signname,
+
+    // }
+    
+    // let data:any =localStorage.getItem('data') || {}
+    // data[id] = obj
+    // localStorage.setItem('data', JSON.stringify(data));
+
+    // console.log(data,'ffffffffffff');
+  }
+
+  const handleNameEvents=(e:any)=>{;
+    setName(e.target.value)
+    nameHelper()
+    
+  }
   const handleMouseDown = (e: any) => {
     setIsDrawing(true);
     const { offsetX, offsetY } = e.evt;
@@ -28,8 +59,16 @@ const DrawingCanvas = React.forwardRef((props, ref) => {
     setIsDrawing(false);
   };
 
-
-  const handleSave = async () => {
+  const nameHelper=()=>{
+    const min = 1;
+    const max = 100;
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    
+    setSignName(`signd${randomNum}`)
+    console.log(signname,1234567);
+    
+  }
+  const handleImage = async () => {
     if (!stageRef.current) return; // add null check
     const uri = stageRef.current.toDataURL();
     const byteString = atob(uri.split(',')[1]);
@@ -42,40 +81,46 @@ const DrawingCanvas = React.forwardRef((props, ref) => {
     const file = new File([blob], 'image.png', { type: 'image/png' });
     console.log(file);
     // to s3 upload
-    const min = 1;
-    const max = 100;
-    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+   
+   
     try {
-      const params = {
+      // await setSignName(`signd${Math.floor(Math.random() * 100) + 1}`)
+      await setAllData(`signd`)
+      console.log(alldata,1234567);
+      
+      await s3.upload({
         Bucket: 'canvisign',
-        Key: `signd${randomNum}`,
+        Key: signname || '',
         Body: file,
-      };
-      await s3.upload(params).promise();
+      }).promise(); 
       console.log('File uploaded successfully!');
     } catch (err) {
       console.error('Error uploading file:', err);
     }
+    
+    Setdatatoparent(false)
+    sendDataToParent(datatoparent,name,startDate,signname);
 
   }
 
   return (
     <div className='flex flex-col'>
       
-        {/* <label htmlFor="">Name</label>
-        <input type="text" className='border-2 border-neutral-800 rounded-md py-2 px-4' />
+        <label htmlFor="">Name</label>
+        <input type="text" onChange={handleNameEvents} className='border-2 border-neutral-800 rounded-md py-2 px-4' />
         <label htmlFor="">Date</label>
         <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className='border-2 border-neutral-800 rounded-md py-2 px-4' />
-        <label htmlFor="">Signature</label> */}
+        <label htmlFor="">Signature</label>
      
       <Stage
         ref={stageRef}
-        width={300}
-        height={250}
+        width={395}
+        height={300}
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
         onMouseup={handleMouseUp}
         className='border-2 border-neutral-800'
+        
       >
         <Layer>
           {lines.map((line: any, i: any) => (
@@ -90,6 +135,6 @@ const DrawingCanvas = React.forwardRef((props, ref) => {
       
     </div>
   );
-});
+}
 
 export default DrawingCanvas;

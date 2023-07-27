@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dynamic from 'next/dynamic';
 import s3 from '@/utils/s3'
-
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -21,16 +21,8 @@ function Page() {
     let [isOpen, setIsOpen] = useState(false)
 
     function closeModal() {
-     
-        setTimeout(() => {
-            if(childRef.current){
-                console.log(childRef.current);
-                
-                childRef.current.handleSave()
-            }
-            setIsOpen(false)
-        }, 3000);
-        
+
+        setIsOpen(dataFromChild || false);
     }
 
     function openModal() {
@@ -43,7 +35,28 @@ function Page() {
     const cancelButtonRef = useRef(null)
 
     const [data, setData] = useState<any>([]);
+    const id = uuidv4();
 
+
+
+
+    const [dataFromChild, setDataFromChild] = useState(null);
+    const [nameFromChild, setNameFromChild] = useState('');
+    const [dateFromChild, setDateFromChild] = useState('');
+    const [signName, setSignName] = useState('');
+    const handleDataFromChild = async (data: any, name: string, date: any,signname:any) => {
+        console.log(data,'data');
+        console.log(name,'nameeeeee');
+        console.log(date,'dateeeeee');
+        console.log(signname,'signname');
+        
+        await setDateFromChild(date)
+        await setNameFromChild(name)
+        await setDataFromChild(data);
+        await setSignName(signname)
+        await closeModal()
+
+    };
 
     const handleOpen = () => {
         setTimeout(() => {
@@ -60,13 +73,18 @@ function Page() {
         try {
             await s3.deleteObject(objectParams).promise()
             console.log(`File "${a}" deleted successfully.`);
+            await window.location.reload();
         } catch (error) {
             console.error(`Error deleting file "${a}":`, error);
         }
 
     }
-
+   
+   
+    
+    // console.log(dateFromChild);
     useEffect(() => {
+
         const getImages = async () => {
             try {
                 const params = {
@@ -82,10 +100,16 @@ function Page() {
                 console.log(err);
             }
         }
+        const storedData = localStorage.getItem('alldata');
+        if (storedData) {
+            setNameFromChild(JSON.parse(storedData));
+        }
         getImages()
-
-    }, [])
-    console.log(process.env.AWS_ACCESS_KEY_ID,34);
+        if (dataFromChild !== null) {
+            // window.location.reload();
+        }
+    }, [dataFromChild])
+    
     
 
     return (
@@ -120,8 +144,8 @@ function Page() {
                                                         </td>
                                                         <td className="whitespace-nowrap px-6 py-4">
                                                             <div className='flex gap-10'>
-                                                                <MdModeEdit className='w-8 h-auto' />
-                                                                <MdDelete className='w-8 h-auto' onClick={() => handleDelete(item.Key)} />
+                                                                <MdModeEdit className='w-8 h-auto cursor-pointer' />
+                                                                <MdDelete className='w-8 h-auto cursor-pointer' onClick={() => handleDelete(item.Key)} />
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -182,24 +206,15 @@ function Page() {
                                     </Dialog.Title>
                                     <div className="mt-2">
                                         <div className='flex flex-col'>
-                                            <label htmlFor="">Name</label>
+                                            {/* <label htmlFor="">Name</label>
                                             <input type="text" className='border-2 border-neutral-800 rounded-md py-2 px-4' />
                                             <label htmlFor="">Date</label>
                                             <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} className='border-2 border-neutral-800 rounded-md py-2 px-4' />
-                                            <label htmlFor="">Signature</label>
-                                            <DynamicDrawingCanvas ref={childRef}/>
+                                            <label htmlFor="">Signature</label> */}
+                                            <DynamicDrawingCanvas sendDataToParent={handleDataFromChild} />
                                         </div>
                                     </div>
 
-                                    <div className="mt-4">
-                                        <button
-                                            type="button"
-                                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                            onClick={closeModal}
-                                        >
-                                            Got it, thanks!
-                                        </button>
-                                    </div>
                                 </Dialog.Panel>
                             </Transition.Child>
                         </div>
