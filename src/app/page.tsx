@@ -9,12 +9,23 @@ import "react-datepicker/dist/react-datepicker.css";
 import dynamic from 'next/dynamic';
 import s3 from '@/utils/s3'
 import { v4 as uuidv4 } from 'uuid';
-
+import { TailSpin } from 'react-loader-spinner'
 
 
 const DynamicDrawingCanvas = dynamic(() => import('../components/DrawingCanvas/DrawingCanvas'), {
     ssr: false, // Ensure this component is only rendered on the client-side
-    loading: () => <div>Loading...</div>, // Optional loading indicator
+    loading: () => <div className='flex justify-center'>
+        <TailSpin
+  height="80"
+  width="80"
+  color="#000"
+  ariaLabel="tail-spin-loading"
+  radius="1"
+  wrapperStyle={{}}
+  wrapperClass=""
+  visible={true}
+/>
+    </div>, // Optional loading indicator
 });
 function Page() {
     const childRef = useRef<any>(null);

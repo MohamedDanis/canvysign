@@ -11,6 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^2.0.18",
+    "@types/firebase": "^3.2.1",
     "@types/multer": "^1.4.7",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
@@ -29,6 +30,7 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
     "react-konva": "^18.2.10",
+    "react-loader-spinner": "^5.3.4",
     "react-tailwindcss-datepicker": "^1.6.5",
     "tailwindcss": "3.3.3",
     "tw-elements": "^1.0.0-beta2",
