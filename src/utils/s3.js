@@ -3,9 +3,9 @@
 import AWS from 'aws-sdk';
 
 const s3 = new AWS.S3({
-  accessKeyId: 'AKIA3CPTENMDTQZUJGVG',
-  secretAccessKey: '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',
-  region: 'ap-southeast-2',
+  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  region: process.env.NEXT_PUBLIC_AWS_REGION,
 });
 
 export default s3;
