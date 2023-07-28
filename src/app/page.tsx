@@ -20,9 +20,13 @@ function Page() {
     const childRef = useRef<any>(null);
     let [isOpen, setIsOpen] = useState(false)
 
-    function closeModal() {
-
-        setIsOpen(dataFromChild || false);
+    async function closeModal() {
+        
+            await setIsOpen(dataFromChild || false);
+            console.log(isOpen,'isopen');
+            
+        
+       
     }
 
     function openModal() {
@@ -92,7 +96,7 @@ function Page() {
         /**
          * Retrieves a list of images from the S3 bucket "canvisign" and sets the state of the component with the list of images.
          */
-        const getImages = async () => {
+        const getImages = async() => {
           try {
             const params = {
               Bucket: "canvisign",
@@ -106,13 +110,10 @@ function Page() {
             console.log(err);
           }
         }
-        const storedData = localStorage.getItem('alldata');
-        if (storedData) {
-            setNameFromChild(JSON.parse(storedData));
-        }
         getImages()
         if (dataFromChild !== null) {
-            window.location.reload();
+            // window.location.reload();
+            handleOpen()
         }
     }, [dataFromChild])
     

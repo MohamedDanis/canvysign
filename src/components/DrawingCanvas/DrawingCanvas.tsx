@@ -13,14 +13,13 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
   const [name,setName]=useState<string>('')
   const[signname,setSignName]=useState<any>('')
   const [datatoparent,Setdatatoparent]=useState(true)
-  const [alldata,setAllData]=useState<any>()
 
 
-  const handleSave = async() => {
-    const id = uuidv4();
+  const handleSave = () => {
+    setTimeout(() => {
+      handleImage();
+    }, 2000);
     
-
-    await handleImage();
 
     // const obj = {
     //   name: name,
@@ -90,11 +89,13 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
     // Used to upload the image to s3 bucket
    
     try {
-      await setAllData(`signd`)
+      const min = 1;
+      const max = 100;
+      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
       
       await s3.upload({
         Bucket: 'canvisign',
-        Key: signname || '',
+        Key: `signd${randomNum}`,
         Body: file,
       }).promise(); 
       console.log('File uploaded successfully!');
@@ -133,7 +134,7 @@ const DrawingCanvas = ({sendDataToParent}:any) => {
         </Layer>
       </Stage>
 
-      <button onClick={handleSave}
+      <button onClick={handleImage}
         className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500  mt-4"
       >Save Signature</button>
       
