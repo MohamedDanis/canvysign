@@ -31,38 +31,32 @@ const DynamicDrawingCanvas = dynamic(() => import('../components/DrawingCanvas/D
     </div>, // Optional loading indicator
 });
 function Page() {
-    const childRef = useRef<any>(null);
     let [isOpen, setIsOpen] = useState(false)
-    const notify = () => {
-  
-        // toast(msg,{
-        //     position: toast.POSITION.TOP_RIGHT,
-        //     className:'text-neutral-900 '
-        // })
-        toast.success("Success Notification !", {
-            position: toast.POSITION.TOP_CENTER
-          });
-    
-          toast.error("Error Notification !", {
-            position: toast.POSITION.TOP_LEFT
-          });
-      };
     async function closeModal() {
 
         await setIsOpen(dataFromChild || false);
         console.log(isOpen, 'isopen');
+    }
+    async function updateCloseModal() {
 
-
-
+        await setUpdateOpen(dataFromChild || false);
+        console.log(updateopen, 'updateisopen');
     }
 
     function openModal() {
-        
+
         setIsOpen(true)
+    }
+    async function updateOpenModal(a: any) {
+        
+        setUpdateData(a)
+        setUpdateOpen(true)
     }
     const [startDate, setStartDate] = useState<any>(new Date());
 
-    const [open, setOpen] = useState(false)
+    const [updateopen, setUpdateOpen] = useState(false)
+
+    const[updatedata, setUpdateData] = useState<any>('')
 
     const cancelButtonRef = useRef(null)
 
@@ -75,7 +69,7 @@ function Page() {
         const { data, error } = await supabase
             .from('signdata')
             .select('*')
-        
+
         setData(data)
 
     }
@@ -89,14 +83,15 @@ function Page() {
         await closeModal()
 
     };
-
+    
+    
     const handleOpen = () => {
         setTimeout(() => {
             toast.success("Signature added successfully", {
                 position: toast.POSITION.TOP_CENTER
-                });
+            });
             setIsOpen(false)
-            
+
         }, 2000);
     }
 
@@ -118,10 +113,10 @@ function Page() {
                 .eq('signName', a)
             toast.error("Signature deleted successfully", {
                 position: toast.POSITION.TOP_CENTER
-                });
-                setIsDelete(true)
+            });
+            setIsDelete(true)
             await s3.deleteObject(objectParams).promise()
-            
+
             console.log(`File "${a}" deleted successfully.`);
         } catch (error) {
             console.error(`Error deleting file "${a}":`, error);
@@ -133,12 +128,12 @@ function Page() {
 
     useEffect(() => {
         supabaseHandle()
-       
+
         if (dataFromChild !== null) {
             // window.location.reload();
             handleOpen()
         }
-    }, [dataFromChild,isDelete])
+    }, [dataFromChild, isDelete])
 
 
 
@@ -174,7 +169,7 @@ function Page() {
                                                         </td>
                                                         <td className="whitespace-nowrap px-6 py-4">
                                                             <div className='flex gap-10'>
-                                                                <MdModeEdit className='w-8 h-auto cursor-pointer' />
+                                                                <MdModeEdit className='w-8 h-auto cursor-pointer' onClick={() => updateOpenModal(item.name)} />
                                                                 <MdDelete className='w-8 h-auto cursor-pointer' onClick={() => handleDelete(item.signName)} />
                                                             </div>
                                                         </td>
@@ -202,7 +197,7 @@ function Page() {
 
 
 
-            {/* modal */}
+            {/* create modal */}
             <Transition appear show={isOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-10" onClose={closeModal}>
                     <Transition.Child
@@ -238,6 +233,52 @@ function Page() {
                                     <div className="mt-2">
                                         <div className='flex flex-col'>
                                             <DynamicDrawingCanvas sendDataToParent={handleDataFromChild} />
+                                        </div>
+                                    </div>
+
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* update modal */}
+            <Transition appear show={updateopen} as={Fragment}>
+                <Dialog as="div" className="relative z-10" onClose={updateCloseModal}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                    <Dialog.Title
+                                        as="h2"
+                                        className="text-3xl text-center font-medium leading-6 text-gray-900 py-5"
+                                    >
+                                        Update  Signature
+                                    </Dialog.Title>
+                                    <div className="mt-2">
+                                        <div className='flex flex-col'>
+                                            <DynamicDrawingCanvas sendDataToParent={handleDataFromChild} member={updatedata} />
                                         </div>
                                     </div>
 
