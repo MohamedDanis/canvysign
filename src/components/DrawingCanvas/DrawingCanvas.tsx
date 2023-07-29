@@ -6,11 +6,19 @@ import DatePicker from "react-datepicker";
 import { v4 as uuidv4 } from 'uuid';
 import supabase from '@/utils/supabase';
 
-const DrawingCanvas = ({ sendDataToParent }: any) => {
+const DrawingCanvas = ({ sendDataToParent }: any,{member}:any) => {
+  // if(!member){
+  //   return <div>Loading...</div>
+  // }
+  
+  
   const [lines, setLines] = useState<any>([]);
   const [isDrawing, setIsDrawing] = useState<any>(false);
   const stageRef = useRef<Konva.Stage>(null);
   const [startDate, setStartDate] = useState<any>(new Date());
+  const [nameError, setNameError] = useState('')
+  const [canvaserror, setCanvaserror] = useState('')
+  const [isButtonDisabled, setButtonDisabled] = useState(true);
 
   const formattedDate = startDate.toLocaleDateString('en-GB', {
     year: 'numeric',
@@ -34,12 +42,12 @@ const DrawingCanvas = ({ sendDataToParent }: any) => {
   }
 
   const handleNameEvents = (e: any) => {
-    ;
     setName(e.target.value)
     nameHelper()
 
   }
   const handleMouseDown = (e: any) => {
+    handleCnvasBlur()
     setIsDrawing(true);
     const { offsetX, offsetY } = e.evt;
     setLines([...lines, { points: [offsetX, offsetY] }]);
@@ -108,10 +116,6 @@ const DrawingCanvas = ({ sendDataToParent }: any) => {
     // Used to upload the image to s3 bucket
 
     try {
-      const min = 1;
-      const max = 100;
-      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-
       await s3.upload({
         Bucket: 'canvisign',
         Key: signname,
@@ -126,12 +130,29 @@ const DrawingCanvas = ({ sendDataToParent }: any) => {
     sendDataToParent(datatoparent);
 
   }
+  function handleNameBlur() {
+    if (name.trim() === '') {
+      setNameError('Name is required')
+    } else {
+      setNameError('')
+    }
+  }
+  function handleCnvasBlur() {
+    if (lines.length === 0) {
+      setCanvaserror('Name is required')
+    } else {
+      setButtonDisabled(false)
+      setCanvaserror('')
+    }
+  }
+  
 
   return (
     <div className='flex flex-col'>
       <div className='flex flex-col mb-3'>
         <label htmlFor="">Name</label>
-        <input type="text" required  onChange={handleNameEvents} className='border-2 border-neutral-800 rounded-md py-2 px-4' />
+        <input type="text" required  onBlur={handleNameBlur}  onChange={handleNameEvents} className='border-2 border-neutral-800 rounded-md py-2 px-4' />
+        {nameError && <p className='text-red-500'>{nameError}</p>}
       </div>
       <div className='flex flex-col mb-3'>
         <label htmlFor="">Date</label>
@@ -159,7 +180,8 @@ const DrawingCanvas = ({ sendDataToParent }: any) => {
       </div>
 
       <button onClick={handleImage}
-        className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500  mt-4"
+        className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500  mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isButtonDisabled}
       >Save Signature</button>
 
     </div>
